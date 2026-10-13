@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DeployHub, панель управления деплоями из GitHub">
+  <title>DeployHub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg class="icon-sprite" aria-hidden="true">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.7 7.5 4.2 7.5-4.2M12 12v9"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12h3l2-6 4 12 3-9 2 3h4"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M12 12h9m-3 0v3m-3-3v2"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></symbol>
+    <symbol id="i-git" viewBox="0 0 24 24"><circle cx="7" cy="6" r="2.2"/><circle cx="17" cy="18" r="2.2"/><circle cx="7" cy="18" r="2.2"/><path d="M7 8.2v7.6M9.2 6h3.3A4.5 4.5 0 0 1 17 10.5v5.3"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 7 8 5-8 5V7Z"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 8a7 7 0 1 0 .2 7M19 4v4h-4"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h2"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18" cy="12" r="1"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4 4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7M10 20h4"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="7" cy="6" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="7" cy="18" r="2"/><path d="M7 8v8M17 9c0 4-2 5-8 5"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4m8-8 4 4-4 4m-2-11-4 14"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">D</span>
+        <span class="brand-name">DeployHub</span>
+      </div>
+
+      <nav class="main-nav" aria-label="Основная навигация">
+        <p class="nav-label">Workspace</p>
+        <button class="nav-item" data-view="overview"><svg><use href="#i-grid"/></svg><span>Обзор</span></button>
+        <button class="nav-item active" data-view="project"><svg><use href="#i-box"/></svg><span>Проекты</span><span class="nav-count">4</span></button>
+        <button class="nav-item" data-view="deployments"><svg><use href="#i-clock"/></svg><span>Деплои</span></button>
+        <button class="nav-item" data-view="metrics"><svg><use href="#i-wave"/></svg><span>Метрики</span></button>
+
+        <p class="nav-label second">Manage</p>
+        <button class="nav-item" data-view="variables"><svg><use href="#i-key"/></svg><span>Переменные</span></button>
+        <button class="nav-item" data-view="settings"><svg><use href="#i-gear"/></svg><span>Настройки</span></button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="usage-head"><span>Build minutes</span><strong>164 / 500</strong></div>
+        <div class="usage-track"><span></span></div>
+        <div class="account">
+          <span class="avatar">AK</span>
+          <span><strong>Alex Kim</strong><small>alex@deployhub.dev</small></span>
+          <svg><use href="#i-more"/></svg>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-button" id="menuButton" aria-label="Открыть меню"><span></span><span></span></button>
+        <div class="crumbs">
+          <span class="repo-icon"><svg><use href="#i-git"/></svg></span>
+          <span class="crumb-muted" id="repoOwner">acme-labs</span>
+          <span class="crumb-sep">/</span>
+          <strong id="repoName">api-gateway</strong>
+          <span class="private-tag">PRIVATE</span>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="searchButton" aria-label="Поиск"><svg><use href="#i-search"/></svg><kbd>/</kbd></button>
+          <button class="icon-button has-alert" aria-label="Уведомления"><svg><use href="#i-bell"/></svg></button>
+          <a class="github-button" id="githubConnect" href="/auth/github"><span class="github-dot"></span><span>GitHub</span></a>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="project-head">
+          <div>
+            <a class="back-link" href="#">Проекты <span>/</span> api-gateway</a>
+            <h1 id="projectName">api-gateway</h1>
+            <div class="service-meta">
+              <span class="status-live" id="serviceStatus"><i></i>Работает</span>
+              <span id="runtimeLabel">Node.js 22</span>
+              <span>Frankfurt, DE</span>
+              <span id="updatedLabel">Обновлен 8 мин назад</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button class="button secondary" id="newProjectButton"><svg><use href="#i-plus"/></svg>Project</button>
+            <button class="button secondary" id="restartButton"><svg><use href="#i-refresh"/></svg>Restart</button>
+            <button class="button primary" id="deployButton"><svg><use href="#i-play"/></svg>Deploy</button>
+            <button class="more-button" id="moreButton" aria-label="Другие действия"><svg><use href="#i-more"/></svg></button>
+            <div class="action-menu" id="actionMenu">
+              <button id="envMenuButton">Изменить переменные</button>
+              <button id="rollbackMenuButton">Откатить версию</button>
+              <button class="danger-text">Остановить сервис</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="url-strip">
+          <div>
+            <span class="url-label">PUBLIC URL</span>
+            <a id="publicUrl" href="http://api-gateway.localhost" target="_blank">api-gateway.localhost <svg><use href="#i-external"/></svg></a>
+          </div>
+          <button class="copy-button" id="copyUrl" data-copy="http://api-gateway.localhost"><svg><use href="#i-copy"/></svg><span>Копировать</span></button>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="panel status-panel">
+            <div class="panel-head">
+              <div><span class="eyebrow">CURRENT DEPLOYMENT</span><h2>Состояние сервиса</h2></div>
+              <span class="healthy-badge"><i></i>Healthy</span>
+            </div>
+            <div class="deployment-current">
+              <div class="commit-mark"><svg><use href="#i-git"/></svg></div>
+              <div class="commit-copy">
+                <strong id="currentCommitMessage">fix: handle expired sessions</strong>
+                <span><code id="currentCommitSha">9d81b2a</code> <span id="currentCommitMeta">by alexkim · main</span></span>
+              </div>
+              <div class="commit-time"><strong>08:42</strong><span>сегодня</span></div>
+            </div>
+            <div class="health-list">
+              <div class="health-row"><span><i class="ok"></i>Web service</span><strong>200 OK</strong><small>42 ms</small></div>
+              <div class="health-row"><span><i class="ok"></i>Postgres</span><strong>Connected</strong><small>8 ms</small></div>
+              <div class="health-row"><span><i class="ok"></i>Redis</span><strong>Connected</strong><small>3 ms</small></div>
+            </div>
+          </section>
+
+          <section class="panel resources-panel">
+            <div class="panel-head">
+              <div><span class="eyebrow">LIVE USAGE</span><h2>Ресурсы</h2></div>
+              <button class="period-button">30 минут <svg><use href="#i-chevron"/></svg></button>
+            </div>
+            <div class="metric-line">
+              <div class="metric-value"><span>CPU</span><strong id="cpuValue">18.4%</strong><small>из 1 vCPU</small></div>
+              <svg class="sparkline" viewBox="0 0 420 72" preserveAspectRatio="none" aria-label="График CPU">
+                <path class="grid-line" d="M0 58H420M0 35H420M0 12H420"/>
+                <polyline id="cpuLine" points="0,52 24,48 48,55 72,44 96,42 120,47 144,32 168,38 192,27 216,36 240,29 264,33 288,21 312,25 336,18 360,24 384,19 420,16"/>
+              </svg>
+            </div>
+            <div class="metric-line memory">
+              <div class="metric-value"><span>MEMORY</span><strong id="memoryValue">312 MB</strong><small>из 512 MB</small></div>
+              <div class="memory-bar"><span></span></div>
+            </div>
+          </section>
+
+          <section class="panel logs-panel">
+            <div class="panel-head logs-head">
+              <div><span class="eyebrow">RUNTIME</span><h2>Логи приложения</h2></div>
+              <div class="log-actions">
+                <span class="streaming"><i></i>Live</span>
+                <button id="clearLogs">Очистить</button>
+                <button class="expand-button" aria-label="Развернуть логи">↗</button>
+              </div>
+            </div>
+            <div class="terminal" id="terminal" aria-live="polite">
+              <div><time>08:42:13</time><span class="log-info">INFO</span><p>Server started on port 3000</p></div>
+              <div><time>08:42:14</time><span class="log-info">INFO</span><p>Database connection established</p></div>
+              <div><time>08:42:15</time><span class="log-info">INFO</span><p>Redis client ready</p></div>
+              <div><time>08:44:02</time><span class="log-get">GET</span><p>/v1/health</p><em>200</em><small>42ms</small></div>
+              <div><time>08:44:18</time><span class="log-post">POST</span><p>/v1/auth/refresh</p><em>200</em><small>86ms</small></div>
+              <div><time>08:45:01</time><span class="log-get">GET</span><p>/v1/users/me</p><em>200</em><small>31ms</small></div>
+              <div><time>08:46:27</time><span class="log-get">GET</span><p>/v1/projects</p><em>200</em><small>48ms</small></div>
+              <div><time>08:47:09</time><span class="log-info">INFO</span><p>Health check completed</p><em>200</em><small>39ms</small></div>
+            </div>
+          </section>
+
+          <section class="panel history-panel">
+            <div class="panel-head">
+              <div><span class="eyebrow">RECENT ACTIVITY</span><h2>История деплоев</h2></div>
+              <button class="text-button" data-view-target="deployments">Все деплои</button>
+            </div>
+            <div class="deploy-list" id="deployList">
+              <article class="deploy-row current">
+                <span class="timeline-dot success"><svg><use href="#i-check"/></svg></span>
+                <div><strong>9d81b2a <span>main</span></strong><p>fix: handle expired sessions</p><small>Production · 8 мин назад</small></div>
+                <button class="row-menu" aria-label="Действия"><svg><use href="#i-more"/></svg></button>
+              </article>
+              <article class="deploy-row">
+                <span class="timeline-dot success"><svg><use href="#i-check"/></svg></span>
+                <div><strong>4f21ac8 <span>main</span></strong><p>feat: add session cache</p><small>Production · 2 ч назад</small></div>
+                <button class="rollback-button">Rollback</button>
+              </article>
+              <article class="deploy-row failed">
+                <span class="timeline-dot error">!</span>
+                <div><strong>aa72f10 <span>main</span></strong><p>chore: update dependencies</p><small>Build failed · вчера</small></div>
+                <button class="row-menu" aria-label="Действия"><svg><use href="#i-more"/></svg></button>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="projectModal" aria-hidden="true">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+      <button class="modal-close" data-close-modal aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <span class="modal-kicker">GITHUB REPOSITORY</span>
+      <h2 id="projectModalTitle">Подключить проект</h2>
+      <p>Укажи репозиторий и параметры запуска. Runtime можно определить автоматически по файлам проекта.</p>
+      <div class="form-grid">
+        <label class="form-field full"><span>GitHub репозиторий</span><input id="projectRepo" class="text-field" list="repositoryOptions" placeholder="owner/repository" autocomplete="off"><datalist id="repositoryOptions"></datalist></label>
+        <label class="form-field"><span>Название</span><input id="projectInputName" class="text-field" placeholder="api-gateway"></label>
+        <label class="form-field"><span>Ветка</span><input id="projectBranch" class="text-field" value="main"></label>
+        <label class="form-field"><span>Папка проекта</span><input id="projectRoot" class="text-field" placeholder="apps/api"></label>
+        <label class="form-field"><span>Runtime</span><select id="projectRuntime" class="text-field"><option value="auto">Auto detect</option><option value="node">Node.js</option><option value="python">Python</option><option value="java">Java</option><option value="dockerfile">Dockerfile</option></select></label>
+        <label class="form-field"><span>Порт</span><input id="projectPort" class="text-field" type="number" min="1" max="65535" value="3000"></label>
+        <label class="form-field"><span>Health check</span><input id="projectHealth" class="text-field" value="/health"></label>
+        <label class="form-field full"><span>Поддомен</span><div class="domain-field"><input id="projectSubdomain" class="text-field" placeholder="api-gateway"><small>.localhost</small></div></label>
+      </div>
+      <label class="check-row"><input type="checkbox" id="projectAutoDeploy" checked><span></span><div><strong>Автодеплой после push</strong><small>GitHub webhook запустит сборку нового commit</small></div></label>
+      <div class="form-error" id="projectFormError"></div>
+      <div class="modal-actions"><button class="button secondary" data-close-modal>Отмена</button><button class="button primary" id="createProjectButton">Подключить проект</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="deployModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deployTitle">
+      <button class="modal-close" data-close-modal aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <span class="modal-kicker">NEW DEPLOYMENT</span>
+      <h2 id="deployTitle">Запустить новый деплой</h2>
+      <p>DeployHub соберет последний коммит из выбранной ветки и обновит сервис после успешной проверки.</p>
+      <label class="field-label">Ветка</label>
+      <button class="select-field"><span><svg><use href="#i-branch"/></svg>main</span><svg><use href="#i-chevron"/></svg></button>
+      <div class="commit-preview">
+        <span class="commit-mark small"><svg><use href="#i-git"/></svg></span>
+        <span><strong>9d81b2a</strong><small>fix: handle expired sessions</small></span>
+        <i>Latest</i>
+      </div>
+      <label class="check-row"><input type="checkbox" id="clearCache"><span></span><div><strong>Очистить кеш сборки</strong><small>Полная установка зависимостей займет больше времени</small></div></label>
+      <div class="modal-actions"><button class="button secondary" data-close-modal>Отмена</button><button class="button primary" id="confirmDeploy"><svg><use href="#i-play"/></svg>Начать деплой</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="envModal" aria-hidden="true">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="envTitle">
+      <button class="modal-close" data-close-modal aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <span class="modal-kicker">ENVIRONMENT</span>
+      <h2 id="envTitle">Переменные окружения</h2>
+      <p>Значения хранятся в зашифрованном виде и применяются при следующем деплое.</p>
+      <div class="env-table" id="envTable">
+        <div class="env-row"><input value="DATABASE_URL" aria-label="Имя переменной"><input type="password" value="postgresql://deployhub/database" aria-label="Значение переменной"><button aria-label="Удалить"><svg><use href="#i-close"/></svg></button></div>
+        <div class="env-row"><input value="REDIS_URL" aria-label="Имя переменной"><input type="password" value="redis://cache:6379" aria-label="Значение переменной"><button aria-label="Удалить"><svg><use href="#i-close"/></svg></button></div>
+        <div class="env-row"><input value="NODE_ENV" aria-label="Имя переменной"><input value="production" aria-label="Значение переменной"><button aria-label="Удалить"><svg><use href="#i-close"/></svg></button></div>
+      </div>
+      <button class="add-env" id="addEnv"><svg><use href="#i-plus"/></svg>Добавить переменную</button>
+      <div class="modal-actions"><button class="button secondary" data-close-modal>Отмена</button><button class="button primary" id="saveEnv">Сохранить</button></div>
+    </div>
+  </div>
+
+  <div class="search-overlay" id="searchOverlay" aria-hidden="true">
+    <div class="search-box">
+      <svg><use href="#i-search"/></svg>
+      <input id="globalSearch" placeholder="Найти проект, деплой или настройку" autocomplete="off">
+      <kbd>ESC</kbd>
+      <div class="search-results" id="searchResults">
+        <button><span class="result-icon"><svg><use href="#i-box"/></svg></span><span><strong>api-gateway</strong><small>Проект · Production</small></span><kbd>↵</kbd></button>
+        <button><span class="result-icon"><svg><use href="#i-clock"/></svg></span><span><strong>История деплоев</strong><small>api-gateway</small></span></button>
+        <button><span class="result-icon"><svg><use href="#i-key"/></svg></span><span><strong>Переменные окружения</strong><small>Настройки проекта</small></span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

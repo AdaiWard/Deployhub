@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible problem in DeployHub.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve DeployHub. Please remove secrets from logs before submitting.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What happened, and what did you expect instead?
+      placeholder: Describe the problem and the expected result.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start DeployHub with...
+        2. Create a project with...
+        3. Press Deploy...
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: DeployHub commit
+      description: Commit SHA or release version where the issue occurs.
+
+  - type: dropdown
+    id: host
+    attributes:
+      label: Docker host
+      options:
+        - Docker Desktop on Windows
+        - Docker Desktop on macOS
+        - Docker Engine on Linux
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste only relevant output. Remove tokens, environment values, and repository credentials.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: I removed secrets and private data from this report.
+          required: true

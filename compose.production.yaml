@@ -1,0 +1,41 @@
+services:
+  api:
+    environment:
+      DEV_MODE: "false"
+      URL_SCHEME: https
+
+  worker:
+    environment:
+      URL_SCHEME: https
+      TRAEFIK_ENTRYPOINT: websecure
+      TRAEFIK_CERT_RESOLVER: letsencrypt
+
+  traefik:
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=deployhub_runtime
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --api.dashboard=true
+      - --ping=true
+    ports:
+      - "443:443"
+    volumes:
+      - traefik_acme:/letsencrypt
+
+  frontend:
+    labels:
+      traefik.http.routers.deployhub-dashboard.rule: Host(`${DASHBOARD_HOST}`)
+      traefik.http.routers.deployhub-dashboard.entrypoints: websecure
+      traefik.http.routers.deployhub-dashboard.tls: "true"
+      traefik.http.routers.deployhub-dashboard.tls.certresolver: letsencrypt
+
+volumes:
+  traefik_acme:

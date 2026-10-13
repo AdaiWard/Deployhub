@@ -1,0 +1,11 @@
+FROM golang:1.24-alpine AS build
+WORKDIR /src
+COPY go.mod go.sum* ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/deployhub-worker ./cmd/worker
+
+FROM docker:29-cli
+RUN apk add --no-cache ca-certificates git tzdata
+COPY --from=build /out/deployhub-worker /usr/local/bin/deployhub-worker
+ENTRYPOINT ["deployhub-worker"]

@@ -1,0 +1,131 @@
+name: deployhub
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: deployhub
+      POSTGRES_USER: deployhub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deployhub}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deployhub -d deployhub"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks: [platform]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks: [platform]
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    environment:
+      HTTP_ADDR: :8080
+      DATABASE_URL: postgres://deployhub:${POSTGRES_PASSWORD:-deployhub}@postgres:5432/deployhub?sslmode=disable
+      REDIS_ADDR: redis:6379
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-local-only-change-this-encryption-key}
+      SESSION_SECRET: ${SESSION_SECRET:-local-only-change-this-session-secret}
+      EXTERNAL_URL: ${EXTERNAL_URL:-http://deployhub.localhost}
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
+      URL_SCHEME: ${URL_SCHEME:-http}
+      DEV_MODE: ${DEV_MODE:-true}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "8080:8080"
+    networks: [platform]
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    environment:
+      DATABASE_URL: postgres://deployhub:${POSTGRES_PASSWORD:-deployhub}@postgres:5432/deployhub?sslmode=disable
+      REDIS_ADDR: redis:6379
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-local-only-change-this-encryption-key}
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
+      URL_SCHEME: ${URL_SCHEME:-http}
+      DOCKER_NETWORK: deployhub_runtime
+      TRAEFIK_ENTRYPOINT: ${TRAEFIK_ENTRYPOINT:-web}
+      TRAEFIK_CERT_RESOLVER: ${TRAEFIK_CERT_RESOLVER:-}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+      DEPLOY_TIMEOUT_MINUTES: ${DEPLOY_TIMEOUT_MINUTES:-20}
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [platform, runtime]
+    restart: unless-stopped
+
+  traefik:
+    image: traefik:v3.6
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=deployhub_runtime
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --ping=true
+    ports:
+      - "80:80"
+      - "8081:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [runtime]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: deployhub_runtime
+      traefik.http.routers.deployhub-dashboard.rule: Host(`deployhub.localhost`) || Host(`localhost`)
+      traefik.http.routers.deployhub-dashboard.entrypoints: web
+      traefik.http.services.deployhub-dashboard.loadbalancer.server.port: "80"
+    networks: [platform, runtime]
+    restart: unless-stopped
+
+networks:
+  platform:
+  runtime:
+    name: deployhub_runtime
+
+volumes:
+  postgres_data:
+  redis_data:
